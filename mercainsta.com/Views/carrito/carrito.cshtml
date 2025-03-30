@@ -1,0 +1,91 @@
+﻿@model List<mercainsta.com.Models.carroitem>
+@{
+    ViewData["Title"] = "carrito de compras";
+    decimal total = Model.Sum(item => item.producto.preciov * item.cantidad);
+
+}
+
+<h2>carrito</h2>
+@if(Model.Count==0)
+{
+    <p>no tiene  productos en tu carrito</p>
+    <a href="@Url.Action("Index","Home")" class="btn btn-primary">ver producto </a>
+
+
+}
+else
+{
+   <table class="table table-striped">
+     
+       <thead>
+           <tr>
+               <th>Producto</th>
+               <th>Descripcion</th>
+               <th>Cantidad</th>
+               <th>Precio Unitario</th>
+               <th>Subtotal</th>
+               <th>Acciones</th>
+
+       </thead>
+       <tbody>
+
+           @foreach(var item in Model)
+            {
+                <tr>
+
+                    <td>@item.producto.nombre</td>
+                    <td>@item.producto.descripcion</td>
+                    <td>
+                        <form asp-action="actualizarItem" asp-controller="Home" method="post" style="display:inline;">
+                         <input type="hidden" name="ProductoId" value="@item.producto.codigo" />
+                         <input type="number" name="Cantidad" value="@item.cantidad" min="1" class="form-control" style="width: 60px;"/>
+                         <button type="submit" class="btn btn-sm btn-secondary">Actualizar</button>
+
+                        </form>
+                    </td>
+
+                    <td>@item.producto.preciov.ToString("C2")</td>
+                    <td>@((item.producto.preciov*item.cantidad).ToString("C2"))</td>
+                    <td>
+                     <form  asp-action="eliminar" asp-controller="Home" method="post" style="display:inline" >
+                      <input type="hidden" name="productoId" value="@item.producto.codigo"/>
+                      <button type="submit" class="btn btn-danger btn-sm" >Eliminar</button>
+
+
+                     </form>
+
+
+                    </td>
+
+
+
+                </tr>           
+
+
+
+           }
+
+       </tbody>
+
+       <tfoot>
+           <tr>
+            <td colspan="4" class="text-right"><strong>Total:</strong></td>
+            <td>@total.ToString("C2")</td>
+            <td></td>
+
+           </tr>
+
+
+       </tfoot>
+
+   </table> 
+
+   <div class="text-right">
+
+       <a href="@Url.Action("Index","Home")" class="btn btn-success">Volver a la tienda</a>
+
+   </div>
+
+
+
+}

@@ -1,0 +1,203 @@
+﻿@model productomodel
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Registro de Compras</title>
+    <link rel="stylesheet" type="text/css" href="~/css/site.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Registro de Compras</h1>
+        <form asp-action="compras" method="post">
+            <div class="mb-3">
+                <label for="Fecha" class="form-label">Fecha</label>
+                <input type="date" class="form-control" name="Fecha" required />
+            </div>
+            <div class="mb-3">
+                <label for="Codigo" class="form-label">Codigo</label>
+                <input min="@DateTime.Now.ToString("yyyy-MM-dd")" max="@DateTime.Now.ToString("yyyy-MM-dd")"
+                       value="@DateTime.Now.ToString("yyyy-MM-dd")" type="text" class="form-control" id="codigoProducto" required />
+                <button type="button" class="btn btn-primary" onclick="agregarProducto()">Agregar Producto</button>
+            </div>
+            <div class="mb-3">
+                <label for="Proveedor" class="form-label">Proveedor</label>
+                <input type="text" class="form-control" name="Proveedor" required />
+            </div>
+
+            <div class="mb-3">
+                <label for="Items" class="form-label">Productos</label>
+                <table class="table" id="tablaDatos">
+                    <thead>
+                        <tr>
+                            <th>ID Producto</th>
+                            <th>Nombre</th>
+                            <th>Cantidad</th>
+                            <th>Valor por Unidad</th>
+                            <th>Subtotal</th>
+                            <th>Eliminar</th>
+                        </tr>
+                    </thead>
+        </form>
+        <tbody id="productosTable">
+            <tr>
+                <td><input type="text" class="form-control" name="ProductoId[]" /></td>
+                <td><input type="text" class="form-control" name="Nombre[]" /></td>
+                <td><input type="number" class="form-control" name="Cantidad" onkeydown="calcularSubtotal(event, this)" /></td>
+                <td><input type="number" class="form-control" name="valorPorUnidad[]" /></td>
+                <td><input type="number" class="form-control" name="Subtotal[]" readonly /></td>
+                <td>
+                    <button type="button" class="btn btn-danger" onclick="eliminarFila(this)">Eliminar</button>
+                </td>
+            </tr>
+        </tbody>
+        </table>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Registrar Compra</button>
+
+    </div>
+
+    <script>
+        function agregarProducto() {
+            var codigo = $("#codigoProducto").val();
+            $.ajax({
+                url: '/Compras/ObtenerProductoPorCodigo',
+                type: 'GET',
+                data: { codigo: codigo },
+                success: function (producto) {
+                    var nuevaFila = `
+                                                <tr>
+                                                    <td><input type="text" class="form-control codigo" name="ProductoId[]" value="${producto.codigo}" readonly /></td>
+                                                    <td><input type="text" class="form-control descripcion"   name="Nombre[]" value="${producto.nombre}" readonly /></td>
+                                                    <td><input type="number" class="form-control cantidad" name="Cantidad[]" onkeydown="calcularSubtotal(event, this)" /></td>
+                                                    <td><input type="number" class="form-control valor" name="Uni[]" value="${producto.preciov}" readonly /></td>
+                                                    <td><input type="number" class="form-control" name="Subtotal[]" readonly /></td>
+                                                    <td><button type="button" class="btn btn-danger" onclick="eliminarFila(this)">Eliminar</button></td>
+                                                </tr>
+                                            `;
+                    $("#productosTable").append(nuevaFila);
+                },
+                error: function () {
+                    alert("Producto no encontrado.");
+                }
+            });
+        }
+
+        function calcularSubtotal(event, input) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                var row = $(input).closest("tr");
+                var cantidad = parseFloat(row.find("input[name='cantidad[]']").val());
+                var valorPorUnidad = parseFloat(row.find("input[name='Uni[]']").val());
+                var subtotal = (valorPorUnidad * cantidad).toFixed(2);
+                row.find("input[name='Subtotal[]']").val(subtotal);
+            }
+        }
+
+        function eliminarFila(button) {
+            var row = button.parentNode.parentNode;
+            row.parentNode.removeChild(row);
+        }
+    </script>
+
+
+
+
+
+    <script>
+        document.getElementById("enviarBtn").addEventListener("click", function () {
+            const tabla = document.getElementById("tablaDatos");
+            const filas = tabla.querySelectorAll("tbody tr");
+
+
+            const items = [];// Array
+
+            filas.forEach(fila => {
+                const codigo = fila.querySelector(".codigo").value;
+                const descripcion = fila.querySelector(".descripcion").value;
+                const cantidad = parseInt(fila.querySelector(".cantidad").value);
+                const valor = parseFloat(fila.querySelector(".valor").value);
+
+                // Agrega   al array
+                items.push({
+                    Codigo: codigo,
+                    Descripcion: descripcion,
+                    Cantidad: cantidad,
+                    Valor: valor
+                });
+            });
+
+            // Enviar  controlador - Metodo
+            fetch("/Recibir/RecibirDatoss", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(items)
+            })
+                .then(response => {
+                    if (!response.ok) throw new Error("Error en la respuesta del servidor");
+                    return response.json();
+                })
+                .then(data => console.log("Respuesta del servidor:", data))
+                .catch(error => console.error("Error al enviar los datos:", error));
+        });
+
+        function calcularTotal() {
+            // Obtener los valores de los inputs
+            var cantidad = parseFloat(document.getElementById('Cantidad').value) || 0;
+            var valor = parseFloat(document.getElementById('Valor').value) || 0;
+
+            // Realizar la multiplicación
+            var total = cantidad * valor;
+
+            // Asignar el resultado al campo Valortotal
+            document.getElementById('Valortotal').value = total.toFixed(2);  // Redondear a 2 decimales
+        }
+
+        // Agregar eventos para detectar cambios en los inputs
+        document.getElementById('Cantidad').addEventListener('input', calcularTotal);
+        document.getElementById('Valor').addEventListener('input', calcularTotal);
+
+        // Función que se llama cuando los campos de cantidad o valor cambian
+        function init() {
+            var cantidadInputs = document.getElementsByName('Cantidad');
+            var valorPorUnidadInputs = document.getElementsByName('valorPorUnidad');
+
+            // Agregar un event listener a cada campo de cantidad y valorPorUnidad para que se actualice el subtotal
+            for (var i = 0; i < cantidadInputs.length; i++) {
+                cantidadInputs[i].addEventListener('input', function () {
+                    var index = Array.prototype.indexOf.call(cantidadInputs, this);
+                    actualizarSubtotal(index);
+                });
+
+                valorPorUnidadInputs[i].addEventListener('input', function () {
+                    var index = Array.prototype.indexOf.call(valorPorUnidadInputs, this);
+                    actualizarSubtotal(index);
+                });
+            }
+        }
+
+        // Ejecutar la función init cuando la página cargue
+        window.onload = init;
+
+    </script>
+
+
+
+
+
+
+
+
+
+
+</body>
+
+
+
+
+
+</html>

@@ -1,0 +1,12 @@
+﻿@{
+    ViewData["Title"] = "Listado de contactanos";
+}
+
+<h2>Listado de contactanos</h2>
+<p>
+    Haga click en el siguiente enlace para generar el documento
+</p>
+<form asp-action="Listadopersonapdfcontactanos" asp-controller="pdfcontactanos">
+    <input type="submit" class="btn btn-success" value="Generar pdf" />
+
+</form>

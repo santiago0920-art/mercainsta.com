@@ -1,0 +1,109 @@
+﻿@model loginmodel
+@{
+    Layout = null; ViewData["Title"] = "Home Page";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+</head>
+<style>
+
+    body {
+        background-color: rgb(233,233,221)
+    }
+
+</style>
+<body>
+
+    <div class="container">
+
+        <div class="row align-items-end ">
+
+
+            <h1 class="text-center"> Inicio de usuario </h1>
+
+        </div>
+
+
+    </div>
+
+
+    <div class="container text-center">
+        <form asp-action="inicio" asp-controller=login>
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <div class="row align-items-end">
+            <div class="col">
+            </div>
+
+
+            <div class="col border border-1 border-dark">
+                <img src="~/css/mercainta.png" width="230" alt="Alternate Text" class="center-center" />
+
+
+                
+                    <div class="mb-3 fw-bold">
+                        <label for="correo" class="form-label">Correo electronico</label>
+                        <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" asp-for="correo">
+                        <span asp-validation-for="correo" class="text-danger"></span>
+                        <div id="emailHelp" class="form-text"></div>
+                    </div>
+
+                    <div class="mb-3 fw-bold">
+                        <label for="contraseña" class="form-label">Contraseña</label>
+                        <input type="password" class="form-control" id="exampleInputPassword1" asp-for="contraseña">
+                        <span asp-validation-for="contraseña" class="text-danger"></span>
+                    </div>
+
+
+
+                    <div class="container w-100 my-5">
+                        <div class="row">
+
+                            <div class="col">
+                                <button type="submit" class="btn btn-primary">iniciar sesion</button>
+                            </div>
+                            @if (TempData["error"] !=null )
+                            {
+                                <div style="color:red;">
+                                    @TempData["erro"]
+                               </div> 
+                            }
+
+
+
+                            <div class="col">
+                                <button type="submit" class="btn btn-primary">salir </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <p class="fw-bold">no tienes cuenta?</p>
+                    <div>
+                        <span><a asp-controller="Usuario" asp-action="registro_usuario" type="submit">crear cuenta</a></span>
+
+                    </div>
+
+                  
+
+                </form>
+
+
+            </div>
+            <div class="col">
+            </div>
+              @section scripts {
+<partial name="_ValidationScriptsPartial" />
+
+
+    } 
+
+        </div>
+    </div>
+ 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+</body>
